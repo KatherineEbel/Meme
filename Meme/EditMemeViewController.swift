@@ -13,9 +13,10 @@ class EditMemeViewController: UIViewController {
   @IBOutlet weak var imageView: UIImageView!
   @IBOutlet weak var cameraButton: UIBarButtonItem!
   @IBOutlet weak var activityButton: UIBarButtonItem!
-  @IBOutlet weak var toolBar: UIToolbar!
   @IBOutlet weak var topTextField: UITextField!
   @IBOutlet weak var bottomTextField: UITextField!
+  @IBOutlet weak var navigationBar: UINavigationBar!
+  @IBOutlet weak var toolBar: UIToolbar!
   
   
   var activeTextField: UITextField!
@@ -40,6 +41,7 @@ class EditMemeViewController: UIViewController {
     cameraButton.enabled = UIImagePickerController.isSourceTypeAvailable(.Camera)
     configureTextFields()
     subscribeToKeyboardNotifications()
+    
   }
   
   override func viewWillDisappear(animated: Bool) {
@@ -90,10 +92,10 @@ class EditMemeViewController: UIViewController {
   // MARK: Generate and save meme
   
   func generateMemedImage() -> UIImage {
+    navigationBar.hidden = true
     toolBar.hidden = true
-    self.navigationController?.setNavigationBarHidden(true, animated: true)
     UIGraphicsBeginImageContext(self.view.frame.size)
-    self.view.drawViewHierarchyInRect(self.view.frame, afterScreenUpdates: true)
+    self.view.drawViewHierarchyInRect(self.imageView.frame, afterScreenUpdates: true)
     let memedImage: UIImage = UIGraphicsGetImageFromCurrentImageContext()
     UIGraphicsEndImageContext()
     return memedImage
@@ -101,6 +103,9 @@ class EditMemeViewController: UIViewController {
   
   func saveMeme() {
     meme = Meme(topText: topTextField.text!, bottomText: bottomTextField.text!, originalImage: imageView.image, memedImage: memedImage)
+    let object = UIApplication.sharedApplication().delegate
+    let appDelegate = object as! AppDelegate
+    appDelegate.memes.append(meme)
   }
   
   // MARK: Actions
@@ -117,7 +122,7 @@ class EditMemeViewController: UIViewController {
     activityViewController.completionWithItemsHandler = {completion in
       self.saveMeme()
       self.toolBar.hidden = false
-      self.navigationController?.setNavigationBarHidden(false, animated: false)
+      self.navigationBar.hidden = false
       self.dismissViewControllerAnimated(true, completion: nil)
     }
   }
